@@ -5,16 +5,36 @@ import Spinner from '../layout/Spinner';
 import { TbUsers, TbUserCircle, TbBuildingStore } from 'react-icons/tb';
 import { ImCodepen } from 'react-icons/im';
 import RepoList from '../repos/RepoList';
+import { getUser, getRepos } from '../../context/github/GithubActions';
 
 function User() {
-  const { getUser, user, loading, getRepos, repos } = useContext(GithubContext);
+  const { user, loading, repos, dispatch } = useContext(GithubContext);
 
   const params = useParams();
 
   useEffect(() => {
-    getUser(params.login);
-    getRepos(params.login);
-  }, []);
+    dispatch({ type: 'set_loading' });
+
+    const getUserData = async () => {
+      const user = await getUser(params.login);
+
+      dispatch({
+        type: 'get_user',
+        payload: user,
+      });
+    };
+
+    const getReposData = async () => {
+      const repos = await getRepos(params.login);
+      dispatch({
+        type: 'get_repos',
+        payload: repos,
+      });
+    };
+
+    getUserData();
+    getReposData();
+  }, [dispatch, params.login]);
 
   const {
     name,
